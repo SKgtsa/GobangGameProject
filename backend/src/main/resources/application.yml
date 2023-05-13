@@ -1,0 +1,36 @@
+server:
+  port: 5174
+  ssl:
+    protocol: TLS
+    key-store: courseback.clankalliance.cn.pfx
+    key-store-password: z8km7y20ckm6d
+    key-alias: courseback.clankalliance.cn
+    enabled: true
+    key-store-type: JKS
+spring:
+  jpa:
+    database-platform: com.clankalliance.backbeta.sqlite.SQLDialect
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:sqlite:database.db
+    driver-class-name: org.sqlite.JDBC
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 8MB
+tencentCloud:
+  sms:
+    secretId: AKIDa1DB3h8KL7pJZbOyKSLzOZVcVAdrqbCZ
+    secretKey: DBuPt9ByXtAD1bx4wufCVZO3c6ZsxqZF
+    appId: 1400745508
+    appKey: 0232c4a6bf053b88dae2b9167c8431a8
+    signName: 丁丁代码
+    templateId: 1563840
+    expireTime: 5
+  captcha:
+    captchaAppId: 198139954
+    appSecretKey: sN8NpgwQiIVhDjPDks3DvMVF5
+  ip: 43.142.53.21
+clankToken:
+  statusExpireTime: 43200000

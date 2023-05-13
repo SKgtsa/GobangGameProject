@@ -1,0 +1,34 @@
+.cardWrap{
+    display: flex;
+    flex-direction: row-reverse;
+}
+.card{
+    border-radius: 3vh 0 0 3vh;
+    background-color: dodgerblue;
+    height: 60vh;
+    box-shadow: darkslategrey 0 0 0.4vh 0;
+    padding-top: 1vh;
+    padding-left: 1vh;
+}
+.statusText{
+    font-size: 3vh;
+    color: aliceblue;
+}
+.playButton{
+    border-style: none;
+    background-color: rgba(0,0,0,0);
+    width: 4vh;
+    height: 4vh;
+}
+.buttonImage{
+    width: 4vh;
+    height: 4vh;
+}
+.buttonArea{
+    background-color: azure;
+    width: 100%;
+    height: 5vh;
+    padding-left: 4vh;
+    border-radius: 2.5vh;
+    padding-top: 1vh;
+}
