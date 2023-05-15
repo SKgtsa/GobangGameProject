@@ -1,7 +1,7 @@
 package com.clankalliance.backbeta.service.impl;
 
-import com.clankalliance.backbeta.entity.user.User;
-import com.clankalliance.backbeta.repository.userRepository.UserRepository;
+import com.clankalliance.backbeta.entity.User;
+import com.clankalliance.backbeta.repository.UserRepository;
 import com.clankalliance.backbeta.response.CommonResponse;
 import com.clankalliance.backbeta.service.TencentService;
 import com.clankalliance.backbeta.service.UserService;
@@ -13,7 +13,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -23,9 +22,6 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private TokenUtil tokenUtil;
-
-    @Resource
-    private UserService userService;
 
     @Resource
     private UserRepository userRepository;
@@ -88,7 +84,7 @@ public class UserServiceImpl implements UserService {
             response.setMessage("短信验证码错误");
             return response;
         }
-        User user = new User(id, nickName, phone, gender, password);
+        User user = new User(id, nickName, phone, gender, password, 0,0);
         try{
             userRepository.save(user);
         }catch (Exception e){
@@ -272,5 +268,35 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         response.setMessage("修改成功");
         return response;
+    }
+
+    /**
+     * 根据游戏结果更新游戏记录
+     * @param win
+     * @param userId
+     */
+    @Override
+    public void handleGameOver(boolean win, String userId){
+        Optional<User> uop = userRepository.findById(userId);
+        if(uop.isEmpty())
+            return;
+        User user = uop.get();
+        if(win){
+            user.setWinNum(user.getWinNum() + 1);
+        }else{
+            user.setLoseNum(user.getLoseNum() + 1);
+        }
+        userRepository.save(user);
+    }
+
+    /**
+     * 为提高耦合性而实现的查找用户方法
+     * @param userId
+     * @return
+     */
+    @Override
+    public User findUserById(String userId){
+        Optional<User> uop = userRepository.findById(userId);
+        return uop.orElse(null);
     }
 }

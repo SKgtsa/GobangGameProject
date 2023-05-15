@@ -1,5 +1,4 @@
-package com.clankalliance.backbeta.entity.user;
-
+package com.clankalliance.backbeta.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -10,10 +9,9 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-
+@Entity
 @Data
 @AllArgsConstructor
-@MappedSuperclass
 public class User {
     @Id
     private String id;
@@ -30,4 +28,11 @@ public class User {
     @Size(max = 50)
     private String password;
 
+    private int winNum;
+
+    private int loseNum;
+
+    public User() {
+
+    }
 }

@@ -138,3 +138,6 @@
 .idea/modules.xml
 .idea/uiDesigner.xml
 .idea/vcs.xml
+.idea/libraries/Maven__org_springframework_boot_spring_boot_starter_websocket_2_5_1.xml
+.idea/libraries/Maven__org_springframework_spring_messaging_5_3_8.xml
+.idea/libraries/Maven__org_springframework_spring_websocket_5_3_8.xml

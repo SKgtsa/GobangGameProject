@@ -1,6 +1,6 @@
 package com.clankalliance.backbeta.service;
 
-import com.clankalliance.backbeta.entity.user.User;
+import com.clankalliance.backbeta.entity.User;
 import com.clankalliance.backbeta.response.CommonResponse;
 
 public interface UserService {
@@ -23,4 +23,8 @@ public interface UserService {
     CommonResponse findPasswordPhone(String phone);
 
     CommonResponse findPasswordCode(String phone ,String code, String password);
+
+    void handleGameOver(boolean win, String userId);
+
+    User findUserById(String userId);
 }

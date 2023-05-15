@@ -1,12 +1,6 @@
 package com.clankalliance.backbeta.utils;
 
-import com.clankalliance.backbeta.entity.user.User;
-import com.clankalliance.backbeta.entity.user.sub.Student;
-import com.clankalliance.backbeta.entity.user.sub.Teacher;
 import com.clankalliance.backbeta.response.CommonResponse;
-import com.clankalliance.backbeta.service.UserService;
-import com.clankalliance.backbeta.utils.StatusManipulateUtils.ManipulateUtil;
-import com.clankalliance.backbeta.utils.StatusManipulateUtils.StatusNode;
 import com.clankalliance.backbeta.utils.StatusManipulateUtilsWithRedis.ManipulateUtilRedis;
 import org.springframework.stereotype.Component;
 
@@ -20,8 +14,6 @@ public class TokenUtil {
     @Resource
     private ManipulateUtilRedis manipulateUtil;
 
-    @Resource
-    private UserService userService;
 
     /**
      * 验证token是否有效，同时返回新token及用户对象
