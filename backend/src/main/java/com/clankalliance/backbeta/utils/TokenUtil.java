@@ -42,6 +42,7 @@ public class TokenUtil {
             response.setSuccess(false);
         }else{
             response.setSuccess(true);
+            response.setToken(manipulateUtil.updateStatus(id));
             response.setMessage(id);
         }
         return response;

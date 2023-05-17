@@ -32,6 +32,8 @@ public class User {
 
     private int loseNum;
 
+    private String avatarURL;
+
     public User() {
 
     }

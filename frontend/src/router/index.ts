@@ -1,41 +1,23 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import {reload} from "@/utils/reloadRouter";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'startPage',
-      component: () => import('../views/startPage.vue'),
+      name: 'loginPage',
+      component: () => import('../views/loginPage.vue'),
     },{
-      path: '/sort/',
-      name: 'sortPage',
-      component: () => import('../views/sortPage.vue'),
-      meta: {
-        keepAlive: true // 需要缓存
-      },
-      children: [
-        {
-          path: '/sort/bubbleSort',
-          name: 'bubbleSort',
-          component: () => import('../components/SortModule/BubbleSortModule.vue')
-        },{
-          path: '/sort/boxSort',
-          name: 'boxSort',
-          component: () => import('../components/SortModule/BoxSortModule.vue')
-        },{
-          path: '/sort/heapSort',
-          name: 'heapSort',
-          component: () => import('../components/SortModule/HeapSortModule.vue')
-        },{
-          path: '/sort/mergeSort',
-          name: 'mergeSort',
-          component: () => import('../components/SortModule/MergeSortModule.vue')
-        }
-      ]
+      path: '/game',
+      name: 'gamePage',
+      component: () => import('../views/gamePage.vue'),
     }
   ]
 })
 
-
+router.beforeEach(async (to, from, next) => {
+  reload();
+  next();
+})
 export default router

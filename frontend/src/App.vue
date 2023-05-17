@@ -1,12 +1,36 @@
 <script setup lang="ts">
 
+import {mobile, showGlobalRouter, windowHeight, windowWidth} from "@/global/global";
+import {_debounce} from "@/utils/throTtle";
 
+const handleWindowResize = () => {
+  windowWidth.value = window.innerWidth;
+  windowHeight.value = window.innerHeight;
+  if(
+      navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)
+      || window.innerWidth / window.innerHeight <= 1
+  ){
+    mobile.value = true;
+  }else{
+    mobile.value = false;
+  }
+}
+
+// redrawPosition(Math.min(windowWidth.value, windowHeight.value) / 4);
+
+
+const handleWindowResizeDebounced = _debounce(handleWindowResize, 300)
+
+
+handleWindowResizeDebounced()
+
+window.addEventListener('resize',handleWindowResizeDebounced)
 
 
 </script>
 
 <template>
-          <router-view />
+          <router-view v-if="showGlobalRouter" />
 </template>
 
 <style scoped>

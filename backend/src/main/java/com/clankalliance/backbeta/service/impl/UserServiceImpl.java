@@ -20,6 +20,8 @@ public class UserServiceImpl implements UserService {
 
     public final String USER_CLASS_NAME = "用户";
 
+    public final String DEFAULT_AVATAR_URL = "/static/inbuild/default.jpg";
+
     @Resource
     private TokenUtil tokenUtil;
 
@@ -84,7 +86,7 @@ public class UserServiceImpl implements UserService {
             response.setMessage("短信验证码错误");
             return response;
         }
-        User user = new User(id, nickName, phone, gender, password, 0,0);
+        User user = new User(id, nickName, phone, gender, password, 0,0,DEFAULT_AVATAR_URL);
         try{
             userRepository.save(user);
         }catch (Exception e){

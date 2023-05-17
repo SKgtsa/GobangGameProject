@@ -8,9 +8,16 @@ export const windowWidth = ref(0)
 export const windowHeight = ref(0)
 export const mobile = ref(false)
 
+export const baseURL = ref('http://localhost:5174');
+
+export const getBaseURL = () => {
+    return baseURL.value;
+}
+
 //数据对象 展示的值
 export let dataOnDisplay = ref([])
-
+//展示app.vue中的router
+export const showGlobalRouter = ref(true);
 //数据对象 真实的值
 export let data = ref([])
 
@@ -43,3 +50,4 @@ export const transition = () => {
 export const fps = ref(60);
 //程序周期 每个操作的时间 单位为秒
 export const cycle = ref(1);
+//每次更换页面会修改该值，代表当前页面的自适应刷新函数
