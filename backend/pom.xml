@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.clankalliance</groupId>
-	<artifactId>backbeta</artifactId>
-	<version>0.7.4</version>
-	<name>backbeta</name>
-	<description>backbeta</description>
+	<artifactId>gobang</artifactId>
+	<version>1.0.0</version>
+	<name>gobang</name>
+	<description>gobang</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>

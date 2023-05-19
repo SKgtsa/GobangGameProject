@@ -13,11 +13,9 @@
 </template>
 
 <script lang="ts" setup>
-import {data, dataOnDisplay, showPage, sortMethod, transition} from "@/global/global";
-import {onMounted, ref} from "vue";
+import {data, dataOnDisplay, sortMethod, transition} from "@/global/global";
+import {ref} from "vue";
 import router from "@/router";
-import {rePosition} from "@/utils/simpleAnimation";
-import {transform, transformForHeap, transformForMerge} from "@/utils/complexAnimation";
 import {ElMessage} from "element-plus";
 
 const rawData = ref('')

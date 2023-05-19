@@ -8,7 +8,8 @@ export const windowWidth = ref(0)
 export const windowHeight = ref(0)
 export const mobile = ref(false)
 
-export const baseURL = ref('http://localhost:5174');
+// export const baseURL = ref('http://localhost:5174');
+export const baseURL = ref('http://gobangback.clankalliance.cn');
 
 export const getBaseURL = () => {
     return baseURL.value;

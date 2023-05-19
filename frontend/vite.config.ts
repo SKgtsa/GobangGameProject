@@ -5,6 +5,7 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/',
   plugins: [vue()],
   resolve: {
     alias: {
@@ -15,7 +16,7 @@ export default defineConfig({
 // 跨域的写法
     proxy: {
       '/api': {
-        target: 'https://courseback.clankalliance.cn/', // 实际请求地址
+        target: 'https://gobang.clankalliance.cn/', // 实际请求地址
         changeOrigin: true,
         secure: true,
         rewrite: (path) => path.replace(/^\/api/, ""),

@@ -79,11 +79,6 @@ public class WebSocketServer {
 
     private static final String MATCH_SET_NAME = "matchSet";
 
-//    @PostConstruct
-//    private void initialize(){
-//        RedisTemplateMatch.opsForSet().add(MATCH_SET_NAME);
-//    }
-
     private static final Logger logger = LoggerFactory.getLogger(WebSocketServer.class);
     //在线客户端数目
     private static int onlineCount = 0;
@@ -283,11 +278,29 @@ public class WebSocketServer {
             roomNeedPlayer.setWhiteId(userId);
             first = false;
         }
+        User user = userService.findUserById(userId);
+        User rival = userService.findUserById(rivalId);
         RedisUtils.add(roomCode,roomNeedPlayer, RedisTemplateCodeRoom);
         RedisUtils.add(userId, roomCode, RedisTemplateIdRoomCode);
         RedisUtils.setDel(MATCH_SET_NAME, RedisTemplateMatch, roomCode);
-        sendMessageTo(rivalId,"start?" + !first);
-        sendMessage("start?" + first);
+        StringJoiner sjR = new StringJoiner("?");
+        StringJoiner sj = new StringJoiner("?");
+        sj.add("start");
+        sj.add("" +  first);
+        sj.add(user.getNickName());
+        sj.add(user.getAvatarURL());
+        sj.add("" + user.getWinNum());
+        sj.add("" + user.getLoseNum());
+
+        sjR.add("start");
+        sjR.add("" + !first);
+        sjR.add(rival.getNickName());
+        sjR.add(rival.getAvatarURL());
+        sjR.add("" + rival.getWinNum());
+        sjR.add("" + rival.getLoseNum());
+
+        sendMessageTo(rivalId,sjR.toString());
+        sendMessage(sj.toString());
     }
 
     private String createRoom(){
@@ -318,8 +331,6 @@ public class WebSocketServer {
         }
         String roomCode = createRoom();
         RedisTemplateMatch.opsForSet().add(MATCH_SET_NAME, roomCode);
-        sendMessage("createRoomSuccess?" + roomCode);
-
     }
 
     private void handleQuit(){

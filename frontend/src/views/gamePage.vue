@@ -32,7 +32,8 @@
       </div>
     </div>
     <div @click="onClick3D" class="three" id="my-three" :style="{
-      'z-index': `${processStatus === 0? 50:150}`
+      // 'z-index': `${processStatus === 0? 50:150}`
+      'z-index': '150'
     }" ></div>
     <div class="onlineArea"  :style="{
       'width': `${mobile? windowWidth:(windowWidth - 0.5 * windowHeight)}px`,
@@ -50,6 +51,12 @@
           <a class="buttonSmallText" >使用邀请码进入房间</a>
         </div>
       </el-button>
+      <el-button class="createPrivate" @click="handleCreatePrivate" >
+        <div class="buttonInside" >
+          <a class="buttonBigText" >创建房间</a>
+          <a class="buttonSmallText" >创建私人房间</a>
+        </div>
+      </el-button>
     </div>
   </div>
   <div class="mask" v-if="waiting" >
@@ -58,11 +65,46 @@
         'width': `${mobile? 90: 30}vw`
       }">
         <div class="waitingText">正在等待玩家</div>
+        <div class="waitingText">房间号:{{roomCode}}</div>
         <el-image class="loadIcon" :src="baseURL + '/static/inbuild/loading.gif'"/>
         <div class="quit" @click="handleQuit" >退出</div>
       </div>
     </div>
   </div>
+  <transition name="el-zoom-in-top">
+    <div class="rivalGameArea" v-show="processStatus === 2">
+      <transition name="el-zoom-in-top">
+        <div class="roundNote" :style="{
+          'width': `${mobile? 40:20}vw`,
+          'top': '4vh',
+          'left': '55vw'
+        }" v-show="!myTurn" style="background-color: dodgerblue" ><div class="roundText">对方回合</div></div>
+      </transition>
+      <div class="gameTextBarTop">
+        <a class="gameText" style="top: 8vh;left: 55vw" >{{rivalinfo.nickName}}</a>
+      </div>
+      <div class="gameAvatar" style="right: 55vw; top: 3vh;border-color: dodgerblue">
+        <el-image class="gameAvatarImage" :src="baseURL + rivalinfo.avatarURL" />
+      </div>
+    </div>
+  </transition>
+  <transition name="el-zoom-in-bottom">
+    <div class="userGameArea" v-show="processStatus === 2">
+      <transition name="el-zoom-in-bottom">
+        <div class="roundNote" :style="{
+          'width': `${mobile? 40:20}vw`,
+          'bottom': '4vh',
+          'right': '55vw'
+        }" v-show="myTurn" style="background-color: #d14845" ><div class="roundText">我方回合</div></div>
+      </transition>
+      <div class="gameTextBarBottom">
+        <a class="gameText" style="bottom: 8vh;right: 55vw">{{userinfo.nickName}}</a>
+      </div>
+      <div class="gameAvatar" style="left: 55vw; bottom: 3vh; border-color: #d14845">
+        <el-image class="gameAvatarImage" :src="baseURL + userinfo.avatarURL" />
+      </div>
+    </div>
+  </transition>
 <!--  <el-dialog v-model="showInputCode" title="接收邀请">-->
 <!--    <el-input v-model="roomCode" placeholder="请输入房间号" />-->
 <!--  </el-dialog>-->
@@ -83,9 +125,15 @@ let scene = null;
 let white = false;//为true,玩家下白棋
 const processStatus = ref(0);//0开始 1过渡 2游戏
 
-// const showInputCode = ref(false);
+const forbiddenClose = (done) => {}
+
+const transTime = ref(5000);
+
+const startPosition = reactive({x: 0, y: 0, z: 0});
 
 const targetPosition = reactive({x: 0, y: 0, z: 0})
+
+const startTime = ref(0);
 
 const roomCode = ref('');
 
@@ -95,7 +143,20 @@ const baseURL = getBaseURL();
 
 const myTurn = ref(false);
 
+const startSize = reactive({
+  w: 0,
+  h: 0
+})
+
 const userinfo = reactive({
+  nickName: '',
+  winNum: 0,
+  loseNum: 0,
+  id: '',
+  avatarURL: ''
+})
+
+const rivalinfo = reactive({
   nickName: '',
   winNum: 0,
   loseNum: 0,
@@ -125,12 +186,16 @@ const rendererSize = reactive({
 //棋盘 null无棋 false黑棋 true白棋
 const logicalBoard = [];
 
-for(let i = 0;i < 15;i ++){
-  logicalBoard[i] = [];
-  for(let j = 0;j < 15;j ++){
-    logicalBoard[i][j] = null;
+const clearBoard = () => {
+  for(let i = 0;i < 15;i ++){
+    logicalBoard[i] = [];
+    for(let j = 0;j < 15;j ++){
+      logicalBoard[i][j] = null;
+    }
   }
 }
+
+clearBoard();
 
 const clearScene = () => {
   cancelAnimationFrame(animation);
@@ -144,8 +209,9 @@ const clearScene = () => {
     }
     child = null;
   });
-  renderer.forceContextLoss();
+  renderer.setSize(0,0);
   renderer.dispose();
+  renderer.clear();
   scene.clear();
   scene = null;
   camera = null;
@@ -183,7 +249,6 @@ const drawLine = (color) => {
 }
 
 const initialRedraw = () => {
-  console.log('transation')
   const length = (mobile.value? windowWidth.value:windowHeight.value) * 0.5;
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(45, 1, 1, 1000);
@@ -196,7 +261,6 @@ const initialRedraw = () => {
 }
 
 const transactionRedraw = () => {
-  console.log('transation')
   const width = window.innerWidth, height = window.innerHeight;
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(45, width/height, 1, 1000);
@@ -264,8 +328,6 @@ const addPiece = (x,y,white,needMark=false) => {
 const redrawPosition = () => {
   const length = Math.min(windowWidth.value, windowHeight.value) / 4;
   boardWidth.value = length;
-  console.log('status: ' + processStatus.value)
-  console.log(length)
   if(scene !== null)
     clearScene();
   switch (processStatus.value){
@@ -287,10 +349,14 @@ const redrawPosition = () => {
 
 const startTrans = () => {
   cancelAnimationFrame(animation);
-  enlargePaceW = (windowWidth.value - rendererSize.width) / 300;
-  enlargePaceH = (windowHeight.value - rendererSize.height) / 300;
+  startSize.w = rendererSize.width;
+  startSize.h = rendererSize.height;
+  startTime.value = new Date().getTime()
   if(processStatus.value === 0) {
     processStatus.value = 1;
+    startPosition.x = camera.position.x;
+    startPosition.y = camera.position.y;
+    startPosition.z = camera.position.z;
     targetPosition.x=0;
     targetPosition.y=-1*position;
     targetPosition.z=position;
@@ -298,6 +364,9 @@ const startTrans = () => {
     processStatus.value = 3;
     const angle = PI * rotateAngle / 180;
     const angleFlat = PI * rotateFlatAngle / 180;
+    startPosition.x = camera.position.x;
+    startPosition.y = camera.position.y;
+    startPosition.z = camera.position.z;
     targetPosition.x=r * Math.cos(angle);
     targetPosition.y=r * Math.sin(angle) * Math.cos(angleFlat);
     targetPosition.z=r * Math.sin(angle) * Math.sin(angleFlat);
@@ -306,31 +375,25 @@ const startTrans = () => {
 }
 
 const transUpdate = () => {
-  let p = camera.position;
-  let x,y,z, xT=targetPosition.x,yT=targetPosition.y,zT=targetPosition.z;
-  x = Math.abs(p.x - xT) > movePace? p.x + (p.x - xT > 0? -1: 1) * movePace:xT;
-  y = Math.abs(p.y - yT) > movePace? p.y + (p.y - yT > 0? -1: 1) * movePace:yT;
-  z = Math.abs(p.z - zT) > movePace? p.z + (p.z - zT > 0? -1: 1) * movePace:zT;
-  if(x===p.x && y===p.y && z===p.z){
-    console.log('transOver')
-    cancelAnimationFrame(animation);
-    if(processStatus.value === 1)
-      processStatus.value = 2;
-    else
-      processStatus.value = 0;
-    setTimeout(redrawPosition,800)
-    return;
+  console.log('transUpdate')
+  let x,y,z, xT=targetPosition.x,yT=targetPosition.y,zT=targetPosition.z, xS=startPosition.x, yS=startPosition.y,zS=startPosition.z;
+  let finishRate = (new Date().getTime() - startTime.value) / transTime.value;
+  console.log(finishRate);
+  console.log(startTime.value);
+  if(finishRate >= 1){
+    finishRate = 1;
   }
+  x = xS + finishRate * (xT - xS);
+  y = yS + finishRate * (yT - yS);
+  z = zS + finishRate * (zT - zS);
   let w,h;
   if(processStatus.value === 1){
-    console.log('扩大 rendererSize.w: ' + rendererSize.width + ', h: ' + rendererSize.height);
-    w = (windowWidth.value - rendererSize.width) > enlargePaceW?rendererSize.width + enlargePaceW:windowWidth.value;
-    h = (windowHeight.value - rendererSize.height) > enlargePaceH?rendererSize.height + enlargePaceH:windowHeight.value;
+    w = startSize.w + (windowWidth.value - startSize.w) * finishRate;
+    h = startSize.h + (windowHeight.value - startSize.h) * finishRate;
   }else{
-    console.log('缩小')
     const length = (mobile.value? windowWidth.value:windowHeight.value) * 0.5;
-    w = (rendererSize.width - length) > enlargePaceW?rendererSize.width - enlargePaceW:length;
-    h = (rendererSize.height - length) > enlargePaceH?rendererSize.height - enlargePaceH:length;
+    w = startSize.w + (length - startSize.w) * finishRate;
+    h = startSize.h + (length - startSize.h) * finishRate;
   }
   camera = new THREE.PerspectiveCamera(45, w/h, 1, 1000);
   camera.position.set(x,y,z);
@@ -340,28 +403,40 @@ const transUpdate = () => {
   rendererSize.height = h;
   renderer.render(scene,camera)
   document.getElementById('my-three')?.appendChild(renderer.domElement)
+  if(finishRate === 1){
+    console.log('transOver')
+    cancelAnimationFrame(animation);
+    if(processStatus.value === 1) {
+      processStatus.value = 2;
+    }else {
+      processStatus.value = 0;
+      clearBoard();
+    }
+    setTimeout(redrawPosition,800)
+    return;
+  }
   animation = requestAnimationFrame(transUpdate);
 }
 
 const onClick3D = (e) => {
   if(myTurn.value){
-    myTurn.value = false;
     let vector = new THREE.Vector3();//三维坐标对象
     vector.set(
         ( e.clientX / window.innerWidth ) * 2 - 1,
         - ( e.clientY / window.innerHeight ) * 2 + 1,
         0.5 );
     vector.unproject( camera );
-    let raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
-    let intersects = raycaster.intersectObjects(scene.children);
+    let rayCaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
+    let intersects = rayCaster.intersectObjects(scene.children);
     if (intersects.length > 0) {
       let selected = intersects[0];//取第一个物体
       const xP = Math.round((selected.point.x + boardWidth.value / 2) / (boardWidth.value / 14));
       const yP = Math.round((selected.point.y + boardWidth.value / 2) / (boardWidth.value / 14));
 
       if(xP >= 0 && xP < 15 && yP >= 0 && yP < 15 && logicalBoard[yP][xP] == null){
+        myTurn.value = false;
         logicalBoard[yP][xP] = white;
-        console.log('发送下棋指令')
+        console.log(logicalBoard[yP][xP])
         ws.send("place?" + xP + "?" + yP);
         addPiece(xP,yP,white);
       }
@@ -380,7 +455,7 @@ window.addEventListener('resize',redrawPositionDebounced)
  */
 
 const ws = new WebSocket(
-    `ws://localhost:5174/websocket/${localStorage.getItem('token')}`
+    `ws://gobangback.clankalliance.cn/websocket/${localStorage.getItem('token')}`
 )
 
 ws.onmessage = (e) => {
@@ -419,7 +494,7 @@ ws.onmessage = (e) => {
       handleLose();
       break;
     case 'start':
-      //start?{first: boolean}
+      //start?{first: boolean}?{nickName}?{avatarURL}?{winNum}?{LoseNum}
       handleStart(request);
       break;
     case 'createRoomSuccess':
@@ -438,6 +513,7 @@ ws.onmessage = (e) => {
 }
 
 const handleRivalDisconnected = () => {
+  startTrans();
   ElMessage({
     message: '对方退出了游戏',
     type: 'error'
@@ -465,6 +541,7 @@ const handleLoginFail = () => {
 
 const handlePlace = (method) => {
   const x = Number(method[1]),y = Number(method[2]),isWhite = (method[3] === 'true');
+  console.log('收到棋子，颜色为白：' + isWhite)
   logicalBoard[y][x] = isWhite;
   addPiece(x,y,isWhite);
   myTurn.value = true;
@@ -497,13 +574,19 @@ const handleLose = () => {
 
 const handleStart = (method) => {
   white = !(method[1] === 'true');
+  console.log(white)
   myTurn.value = !white;
   waiting.value = false;
+  rivalinfo.nickName= method[2];
+  rivalinfo.winNum = Number(method[4]);
+  rivalinfo.loseNum = Number(method[5]);
+  rivalinfo.avatarURL = method[3];
   startTrans();
 }
 
-const handleCreateRoomSuccess = () => {
+const handleCreateRoomSuccess = (method) => {
   waiting.value = true;
+  roomCode.value = method[1];
 }
 
 const handleRoomInvalid = () => {
@@ -597,6 +680,19 @@ const inputCode = () => {
   border-width: 8px;
   border-color: rgba(255,255,255,0.8);
 }
+.createPrivate{
+  width: 80%;
+  height: 20%;
+  margin: auto;
+  border-radius: 2vh;
+  background: -webkit-linear-gradient(to bottom right, rgba(255,216,38,1),rgba(255,216,38,0.3));
+  background: -o-linear-gradient(to bottom right, rgba(255,216,38,1),rgba(255,216,38,0.3));
+  background: -moz-linear-gradient(to bottom right, rgba(255,216,38,1),rgba(255,216,38,0.3));
+  background: linear-gradient(to bottom right, rgba(255,216,38,1),rgba(255,216,38,0.3));
+  color: azure;
+  border-width: 8px;
+  border-color: rgba(255,255,255,0.8);
+}
 .buttonInside{
   display: flex;
   flex-direction: column;
@@ -635,12 +731,11 @@ const inputCode = () => {
 .avatar{
   background-color: #FFFFFF;
   width: 80%;
-  height: 80%;
+  height: 66%;
   margin: auto;
 }
 .avatarImage{
   width: 100%;
-  height: 100%;
 }
 .record{
   width: 50%;
@@ -689,5 +784,71 @@ const inputCode = () => {
 }
 .quit:hover{
   color: #d14845;
+}
+.rivalGameArea{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 15vh;
+  z-index: 200;
+}
+.userGameArea{
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100vw;
+  height: 15vh;
+  z-index: 200;
+}
+.roundNote{
+  height: 10vh;
+  font-size: 5vh;
+  color: #FFFFFF;
+  border-radius: 1vh;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  z-index: 210;
+}
+.roundText{
+  margin: auto;
+}
+.gameTextBarTop{
+  width: 100vw;
+  height: 10vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: -webkit-linear-gradient(to bottom, rgba(60,60,150,1),rgba(0,0,80,0));
+  background: -o-linear-gradient(to bottom, rgba(60,60,150,1),rgba(0,0,80,0));
+  background: -moz-linear-gradient(to bottom, rgba(60,60,150,1),rgba(0,0,80,0));
+  background: linear-gradient(to bottom, rgba(60,60,150,1),rgba(0,0,80,0));
+}
+.gameTextBarBottom{
+  width: 100vw;
+  height: 10vh;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background: -webkit-linear-gradient(to top, rgba(150,60,60,1),rgba(80,0,0,0));
+  background: -o-linear-gradient(to top, rgba(150,60,60,1),rgba(80,0,0,0));
+  background: -moz-linear-gradient(to top, rgba(150,60,60,1),rgba(80,0,0,0));
+  background: linear-gradient(to top, rgba(150,60,60,1),rgba(80,0,0,0));
+}
+.gameAvatar{
+  width: 15vh;
+  height: 15vh;
+  position: absolute;
+  border-width: 10px;
+  border-style: solid;
+}
+.gameAvatarImage{
+  width: 100%;
+}
+.gameText{
+  color: #FFFFFF;
+  font-size: 5vh;
+  position: absolute;
 }
 </style>
