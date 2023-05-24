@@ -31,10 +31,7 @@
         </div>
       </div>
     </div>
-    <div @click="onClick3D" class="three" id="my-three" :style="{
-      // 'z-index': `${processStatus === 0? 50:150}`
-      'z-index': '150'
-    }" ></div>
+    <div @click="onClick3D" class="three" id="my-three"></div>
     <div class="onlineArea"  :style="{
       'width': `${mobile? windowWidth:(windowWidth - 0.5 * windowHeight)}px`,
       'height': `${mobile? (windowHeight - 0.5 * windowWidth):windowHeight}px`
@@ -114,7 +111,7 @@
 import {getBaseURL, mobile, windowHeight, windowWidth} from "@/global/global";
 import * as THREE from 'three'
 
-import {reactive, ref} from "vue";
+import {onUnmounted, reactive, ref} from "vue";
 import {_debounce} from "@/utils/throTtle";
 import router from "@/router";
 import {ElMessage, ElMessageBox} from "element-plus";
@@ -375,11 +372,8 @@ const startTrans = () => {
 }
 
 const transUpdate = () => {
-  console.log('transUpdate')
   let x,y,z, xT=targetPosition.x,yT=targetPosition.y,zT=targetPosition.z, xS=startPosition.x, yS=startPosition.y,zS=startPosition.z;
   let finishRate = (new Date().getTime() - startTime.value) / transTime.value;
-  console.log(finishRate);
-  console.log(startTime.value);
   if(finishRate >= 1){
     finishRate = 1;
   }
@@ -404,7 +398,6 @@ const transUpdate = () => {
   renderer.render(scene,camera)
   document.getElementById('my-three')?.appendChild(renderer.domElement)
   if(finishRate === 1){
-    console.log('transOver')
     cancelAnimationFrame(animation);
     if(processStatus.value === 1) {
       processStatus.value = 2;
@@ -430,13 +423,14 @@ const onClick3D = (e) => {
     let intersects = rayCaster.intersectObjects(scene.children);
     if (intersects.length > 0) {
       let selected = intersects[0];//取第一个物体
+      console.log('x: ' + selected.point.x + ', y: ' + selected.point.y);
       const xP = Math.round((selected.point.x + boardWidth.value / 2) / (boardWidth.value / 14));
       const yP = Math.round((selected.point.y + boardWidth.value / 2) / (boardWidth.value / 14));
+      console.log('xP: ' + xP + ', yP: ' + yP);
 
       if(xP >= 0 && xP < 15 && yP >= 0 && yP < 15 && logicalBoard[yP][xP] == null){
         myTurn.value = false;
         logicalBoard[yP][xP] = white;
-        console.log(logicalBoard[yP][xP])
         ws.send("place?" + xP + "?" + yP);
         addPiece(xP,yP,white);
       }
@@ -454,63 +448,72 @@ window.addEventListener('resize',redrawPositionDebounced)
  * websocket
  */
 
-const ws = new WebSocket(
-    `ws://gobangback.clankalliance.cn/websocket/${localStorage.getItem('token')}`
-)
+let ws = null
 
-ws.onmessage = (e) => {
-  console.log('========ws收到========')
-  console.log(e)
-  console.log('=====================')
-  const request = e.data.split('?');
-  switch (request[0]){
-    case 'connected':
-      //connected?{nickName}?{winNum}?{loseNum}?{id}?{gender}?{avatarURL}?{token}
-      console.log('connected');
-      handleConnected(request);
-      break;
-    case 'loginFail':
-      //loginFail
-      handleLoginFail();
-      break;
-    case 'place':
-      //place?{x}?{y}?{white: boolean}
-      handlePlace(request);
-      break;
-    case 'placeError':
-      //error
-      handleLoginFail();
-      break;
-    case 'occupied':
-      //occupied?{white:boolean}?{x}?{y}
-      handleOccupied(request);
-      break;
-    case 'win':
-      //win
-      handleWin();
-      break;
-    case 'lose':
-      //lose
-      handleLose();
-      break;
-    case 'start':
-      //start?{first: boolean}?{nickName}?{avatarURL}?{winNum}?{LoseNum}
-      handleStart(request);
-      break;
-    case 'createRoomSuccess':
-      //createRoomSuccess?{roomCode}
-      handleCreateRoomSuccess(request);
-      break;
-    case 'roomCodeInvalid':
-      //roomCodeInvalid
-      handleRoomInvalid();
-      break;
-    case 'rivalOffline':
-      //rivalOffline
-      handleRivalDisconnected();
-      break;
+const wsConnect = () => {
+  ws = new WebSocket(
+      `ws://gobangback.clankalliance.cn/websocket/${localStorage.getItem('token')}`
+      // `ws://localhost:5174/websocket/${localStorage.getItem('token')}`
+  )
+  ws.onclose = (e) => {
+    wsConnect();
+  }
+
+  ws.onmessage = (e) => {
+    console.log('========ws收到========')
+    console.log(e)
+    console.log('=====================')
+    const request = e.data.split('?');
+    switch (request[0]){
+      case 'connected':
+        //connected?{nickName}?{winNum}?{loseNum}?{id}?{gender}?{avatarURL}?{token}
+        handleConnected(request);
+        break;
+      case 'loginFail':
+        //loginFail
+        handleLoginFail();
+        break;
+      case 'place':
+        //place?{x}?{y}?{white: boolean}
+        handlePlace(request);
+        break;
+      case 'placeError':
+        //error
+        handleLoginFail();
+        break;
+      case 'occupied':
+        //occupied?{white:boolean}?{x}?{y}
+        handleOccupied(request);
+        break;
+      case 'win':
+        //win
+        handleWin();
+        break;
+      case 'lose':
+        //lose
+        handleLose();
+        break;
+      case 'start':
+        //start?{first: boolean}?{nickName}?{avatarURL}?{winNum}?{LoseNum}
+        handleStart(request);
+        break;
+      case 'createRoomSuccess':
+        //createRoomSuccess?{roomCode}
+        handleCreateRoomSuccess(request);
+        break;
+      case 'roomCodeInvalid':
+        //roomCodeInvalid
+        handleRoomInvalid();
+        break;
+      case 'rivalOffline':
+        //rivalOffline
+        handleRivalDisconnected();
+        break;
+    }
   }
 }
+
+wsConnect();
 
 const handleRivalDisconnected = () => {
   startTrans();
@@ -523,12 +526,13 @@ const handleRivalDisconnected = () => {
 const handleConnected = (method) => {
   userinfo.nickName= method[1];
   userinfo.id = method[4];
-  userinfo.gender = method[5] === 'true';
+  // userinfo.gender = method[5] === 'true';
   userinfo.winNum = Number(method[2]);
   userinfo.loseNum = Number(method[3]);
   userinfo.avatarURL = method[6];
-  localStorage.setItem('token', method[7]);
-  console.log(userinfo);
+  if(method.length === 8){
+    localStorage.setItem('token', method[7]);
+  }
 }
 
 const handleLoginFail = () => {
@@ -541,7 +545,6 @@ const handleLoginFail = () => {
 
 const handlePlace = (method) => {
   const x = Number(method[1]),y = Number(method[2]),isWhite = (method[3] === 'true');
-  console.log('收到棋子，颜色为白：' + isWhite)
   logicalBoard[y][x] = isWhite;
   addPiece(x,y,isWhite);
   myTurn.value = true;
@@ -574,7 +577,6 @@ const handleLose = () => {
 
 const handleStart = (method) => {
   white = !(method[1] === 'true');
-  console.log(white)
   myTurn.value = !white;
   waiting.value = false;
   rivalinfo.nickName= method[2];
@@ -613,6 +615,11 @@ const handleCodeEnter = () => {
   ws.send("invite?" + roomCode.value);
 }
 
+onUnmounted(() => {
+  ws.send('quit');
+  ws.close();
+})
+
 const inputCode = () => {
   ElMessageBox.prompt('请输入房间号','接收邀请',{
     confirmButtonText: '确认',
@@ -635,6 +642,7 @@ const inputCode = () => {
   position: absolute;
   left: 0;
   bottom: 0;
+  z-index: 150;
 }
 .userArea{
   background-color: #313131;

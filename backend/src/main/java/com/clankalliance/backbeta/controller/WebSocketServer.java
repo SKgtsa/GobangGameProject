@@ -256,8 +256,8 @@ public class WebSocketServer {
         ){
             sendMessage("win");
             sendMessageTo(rivalId, "lose");
-            userService.handleGameOver(true, userId);
-            userService.handleGameOver(false,rivalId);
+            sendMessage(userService.handleGameOver(true, userId));
+            sendMessageTo(rivalId,userService.handleGameOver(false,rivalId));
             RedisUtils.delete(roomCode, RedisTemplateCodeRoom);
             RedisUtils.delete(userId, RedisTemplateIdRoomCode);
             RedisUtils.delete(rivalId, RedisTemplateIdRoomCode);
@@ -344,9 +344,13 @@ public class WebSocketServer {
             RedisUtils.delete(roomCode, RedisTemplateCodeRoom);
             if(room.getWhiteId() != null){
                 RedisUtils.delete(room.getWhiteId(), RedisTemplateIdRoomCode);
+                if(!room.getWhiteId().equals(userId))
+                    sendMessageTo(room.getWhiteId(), "rivalOffline");
             }
             if(room.getBlackId() != null){
                 RedisUtils.delete(room.getBlackId(), RedisTemplateIdRoomCode);
+                if(!room.getBlackId().equals(userId))
+                    sendMessageTo(room.getBlackId(), "rivalOffline");
             }
             roomCodeGenerator.returnCode(roomCode);
         }

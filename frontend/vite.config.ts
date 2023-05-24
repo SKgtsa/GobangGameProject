@@ -16,7 +16,7 @@ export default defineConfig({
 // 跨域的写法
     proxy: {
       '/api': {
-        target: 'https://gobang.clankalliance.cn/', // 实际请求地址
+        target: 'http://gobang.clankalliance.cn/', // 实际请求地址
         changeOrigin: true,
         secure: true,
         rewrite: (path) => path.replace(/^\/api/, ""),

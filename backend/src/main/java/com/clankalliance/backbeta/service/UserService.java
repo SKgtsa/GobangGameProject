@@ -24,7 +24,7 @@ public interface UserService {
 
     CommonResponse findPasswordCode(String phone ,String code, String password);
 
-    void handleGameOver(boolean win, String userId);
+    String handleGameOver(boolean win, String userId);
 
     User findUserById(String userId);
 }

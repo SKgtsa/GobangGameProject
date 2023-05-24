@@ -241,13 +241,13 @@ const sendCode = () => {
 const sendCodeRegister = () => {
   if(codeSend.value)
     return;
-  if(phone.value == ''){
+  if(registerInfo.phone == ''){
     ElMessage({
       message: '请填写完整',
       type: 'error'
     })
     return;
-  }else if(!isNumber(phone.value)){
+  }else if(!isNumber(registerInfo.phone)){
     ElMessage({
       message: '请填写正常手机号',
       type: 'error'

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -278,10 +279,10 @@ public class UserServiceImpl implements UserService {
      * @param userId
      */
     @Override
-    public void handleGameOver(boolean win, String userId){
+    public String handleGameOver(boolean win, String userId){
         Optional<User> uop = userRepository.findById(userId);
         if(uop.isEmpty())
-            return;
+            return null;
         User user = uop.get();
         if(win){
             user.setWinNum(user.getWinNum() + 1);
@@ -289,6 +290,15 @@ public class UserServiceImpl implements UserService {
             user.setLoseNum(user.getLoseNum() + 1);
         }
         userRepository.save(user);
+        StringJoiner sj = new StringJoiner("?");
+        sj.add("connected");
+        sj.add(user.getNickName());
+        sj.add("" + user.getWinNum());
+        sj.add("" + user.getLoseNum());
+        sj.add("" + user.getId());
+        sj.add("" + user.isGender());
+        sj.add(user.getAvatarURL());
+        return sj.toString();
     }
 
     /**

@@ -13,6 +13,9 @@ spring:
     multipart:
       max-file-size: 8MB
       max-request-size: 8MB
+  redis:
+    host: 127.0.0.1
+    port: 5175
 tencentCloud:
   sms:
     secretId: AKIDa1DB3h8KL7pJZbOyKSLzOZVcVAdrqbCZ
