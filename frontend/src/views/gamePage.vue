@@ -183,6 +183,9 @@ const rendererSize = reactive({
 //棋盘 null无棋 false黑棋 true白棋
 const logicalBoard = [];
 
+/**
+ * 清空棋盘操作
+ */
 const clearBoard = () => {
   for(let i = 0;i < 15;i ++){
     logicalBoard[i] = [];
@@ -194,6 +197,9 @@ const clearBoard = () => {
 
 clearBoard();
 
+/**
+ * 清空渲染场景操作
+ */
 const clearScene = () => {
   cancelAnimationFrame(animation);
   console.log('clear')
@@ -216,6 +222,9 @@ const clearScene = () => {
   renderer = null;
 }
 
+/**
+ * 等待界面时，更新棋盘旋转时镜头位置的函数
+ */
 const rotateUpdate = () => {
   const angle = PI * rotateAngle / 180;
   const angleFlat = PI * rotateFlatAngle / 180;
@@ -227,6 +236,10 @@ const rotateUpdate = () => {
   animation = requestAnimationFrame(rotateUpdate);
 }
 
+/**
+ * 绘制棋盘格方法
+ * @param color 棋盘上线的颜色
+ */
 const drawLine = (color) => {
   for(let i = 0;i < 15;i ++){
     let row = [];
@@ -245,6 +258,9 @@ const drawLine = (color) => {
   }
 }
 
+/**
+ * 等待界面时的重新渲染函数
+ */
 const initialRedraw = () => {
   const length = (mobile.value? windowWidth.value:windowHeight.value) * 0.5;
   scene = new THREE.Scene();
@@ -257,6 +273,9 @@ const initialRedraw = () => {
   rotateUpdate();
 }
 
+/**
+ * 由等待界面进入游戏过程中的重新渲染函数
+ */
 const transactionRedraw = () => {
   const width = window.innerWidth, height = window.innerHeight;
   scene = new THREE.Scene();
@@ -268,8 +287,10 @@ const transactionRedraw = () => {
   drawLine(0x00ff00);
 }
 
+/**
+ * 在游戏内的重新渲染函数
+ */
 const inGameRedraw = () => {
-  console.log('ingame')
   scene = new THREE.Scene();
   const geometry = new THREE.BoxGeometry(boardWidth.value * 1.2, boardWidth.value * 1.2, boardWidth.value / 10);
   const material = new THREE.MeshLambertMaterial({
@@ -311,6 +332,13 @@ const inGameRedraw = () => {
   }
 }
 
+/**
+ * 添加棋子函数
+ * @param x 新棋子x坐标
+ * @param y 新棋子y坐标
+ * @param white 是否执白子
+ * @param needMark 是否需要提示
+ */
 const addPiece = (x,y,white,needMark=false) => {
   const  pieceGeometry = new THREE.SphereGeometry(5, 4, 4);
   const  pieceMaterial = new THREE.MeshLambertMaterial({
@@ -322,6 +350,9 @@ const addPiece = (x,y,white,needMark=false) => {
   renderer.render(scene,camera);
 }
 
+/**
+ * 重新渲染函数
+ */
 const redrawPosition = () => {
   const length = Math.min(windowWidth.value, windowHeight.value) / 4;
   boardWidth.value = length;
@@ -344,6 +375,10 @@ const redrawPosition = () => {
   }
 }
 
+/**
+ * 开始变换函数
+ * 执行该函数，代表进入游戏或退出游戏。
+ */
 const startTrans = () => {
   cancelAnimationFrame(animation);
   startSize.w = rendererSize.width;
@@ -371,6 +406,9 @@ const startTrans = () => {
   transUpdate();
 }
 
+/**
+ * 变换过程中，每次刷新时执行的函数
+ */
 const transUpdate = () => {
   let x,y,z, xT=targetPosition.x,yT=targetPosition.y,zT=targetPosition.z, xS=startPosition.x, yS=startPosition.y,zS=startPosition.z;
   let finishRate = (new Date().getTime() - startTime.value) / transTime.value;
@@ -411,6 +449,10 @@ const transUpdate = () => {
   animation = requestAnimationFrame(transUpdate);
 }
 
+/**
+ * 处理鼠标点击棋盘的操作
+ * @param e 点击事件
+ */
 const onClick3D = (e) => {
   if(myTurn.value){
     let vector = new THREE.Vector3();//三维坐标对象
@@ -460,9 +502,6 @@ const wsConnect = () => {
   }
 
   ws.onmessage = (e) => {
-    console.log('========ws收到========')
-    console.log(e)
-    console.log('=====================')
     const request = e.data.split('?');
     switch (request[0]){
       case 'connected':

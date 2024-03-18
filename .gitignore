@@ -154,3 +154,14 @@ backend/target/maven-status/maven-compiler-plugin/testCompile/default-testCompil
 backend/target/surefire-reports/com.clankalliance.backbeta.BackBetaApplicationTests.txt
 backend/target/surefire-reports/TEST-com.clankalliance.backbeta.BackBetaApplicationTests.xml
 backend/target/test-classes/com/clankalliance/backbeta/BackBetaApplicationTests.class
+backend/.idea/compiler.xml
+backend/.idea/encodings.xml
+backend/.idea/jarRepositories.xml
+backend/.idea/jpa-buddy.xml
+backend/.idea/misc.xml
+backend/.idea/vcs.xml
+backend/.idea/workspace.xml
+backend/database.db
+backend/database.db
+backend/database.db
+frontend.zip

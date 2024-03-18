@@ -12,10 +12,8 @@ import java.util.concurrent.TimeUnit;
 import static com.clankalliance.backbeta.utils.RedisUtils.*;
 
 /**
- * 为适配微信做了小部分修改
- *
  * 基于redis实现用户登陆状态的管理
- * 能够在一个程序周期内维持登陆状态
+ * 能够持久化维持登陆状态
  * 更新及自动回收用户状态，并自动生成身份验证用的验证码与token
  * 身份过期时间设置整合进了application.yml 便于后期维护
  * 减少对数据库的查询

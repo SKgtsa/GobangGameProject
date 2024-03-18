@@ -16,11 +16,7 @@ const handleWindowResize = () => {
   }
 }
 
-// redrawPosition(Math.min(windowWidth.value, windowHeight.value) / 4);
-
-
 const handleWindowResizeDebounced = _debounce(handleWindowResize, 300)
-
 
 handleWindowResizeDebounced()
 
