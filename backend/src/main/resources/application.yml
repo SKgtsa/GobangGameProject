@@ -18,17 +18,17 @@ spring:
     port: 5175
 tencentCloud:
   sms:
-    secretId: AKIDa1DB3h8KL7pJZbOyKSLzOZVcVAdrqbCZ
-    secretKey: DBuPt9ByXtAD1bx4wufCVZO3c6ZsxqZF
-    appId: 1400745508
-    appKey: 0232c4a6bf053b88dae2b9167c8431a8
-    signName: 丁丁代码
-    templateId: 1563840
-    expireTime: 5
+    secretId:
+    secretKey:
+    appId:
+    appKey:
+    signName:
+    templateId:
+    expireTime:
   captcha:
-    captchaAppId: 198139954
-    appSecretKey: sN8NpgwQiIVhDjPDks3DvMVF5
-  ip: 43.142.53.21
+    captchaAppId:
+    appSecretKey: 
+  ip: 
 clankToken:
   statusExpireTime: 43200000
   phoneExpireTime: 4320000
